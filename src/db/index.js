@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 
 const {
+  ENVIRONMENT,
   POSTGRESQL_USER,
   POSTGRESQL_HOST,
   POSTGRESQL_DATABASE,
@@ -14,6 +15,7 @@ const pool = new Pool({
   database: POSTGRESQL_DATABASE,
   password: POSTGRESQL_PASSWORD,
   port: POSTGRESQL_PORT,
+  ssl: ENVIRONMENT === 'PRODUCTION' ? true : false,
 });
 
 module.exports = {
