@@ -24,7 +24,7 @@ passport.use(
       }
 
       // return user data
-      let user = { id: rows[0].id, email: rows[0].email };
+      const user = { id: rows[0].id, email: rows[0].email };
       return await done(null, user);
     } catch (error) {
       console.log(error.message);

@@ -2,19 +2,17 @@ const { Router } = require('express');
 const router = Router();
 
 // controllers
-const { getUsers, register, login, protectedGetUsers, logout } = require('../controllers/auth');
+const { register, login, logout } = require('../controllers/auth');
 
 // validators
 const { registerValidation, loginValidation } = require('../validators/auth');
 
 // middlewares
 const { validationMiddleware } = require('../middlewares/validationMiddleware');
-const { userAuth } = require('../middlewares/authMiddleware');
 
-// user routes
-router.get('/protected-get-users', userAuth, protectedGetUsers);
+// auth routs
 router.post('/register-users', registerValidation, validationMiddleware, register);
 router.post('/login', loginValidation, validationMiddleware, login);
-router.get('/logout', logout);
+router.post('/logout', logout);
 
 module.exports = router;

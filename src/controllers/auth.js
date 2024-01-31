@@ -3,26 +3,11 @@ const { sign } = require('jsonwebtoken');
 const db = require('../db');
 const { SECRET } = require('../constants');
 
-exports.protectedGetUsers = async (req, res) => {
-  try {
-    const { rows } = await db.query('select user_id, email, created_at from users');
-    return res.status(200).json({
-      success: true,
-      users: rows,
-    });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-
 exports.register = async (req, res) => {
   const { email, password } = req.body;
   try {
     const hashedPassword = await hash(password, 10);
-    await db.query('insert into users(email, password)values($1,$2)', [email, hashedPassword]);
+    await db.query('insert into users(email, password, roles)values($1,$2,$3)', [email, hashedPassword, ['1111']]);
     return res.status(201).json({
       success: true,
       message: 'The Registration was successfull!',
@@ -40,9 +25,10 @@ exports.login = async (req, res) => {
   const payload = {
     id: user.user_id,
     email: user.email,
+    created_at: user.created_at,
   };
   try {
-    const token = await sign(payload, SECRET);
+    const token = await sign(payload, SECRET, { expiresIn: '8h' });
     return res
       .status(200)
       .cookie('token', token, { httpOnly: true })
@@ -55,14 +41,8 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = async (req, res) => {
-  const user = req.user;
-  const payload = {
-    id: user.user_id,
-    email: user.email,
-  };
+exports.logout = async (_req, res) => {
   try {
-    const token = await sign(payload, SECRET);
     return res
       .status(200)
       .clearCookie('token', { httpOnly: true })
