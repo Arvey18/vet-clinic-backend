@@ -1,7 +1,7 @@
 const { hash } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 const db = require('../db');
-const { SECRET } = require('../constants');
+const { SECRET, TOKEN_EXPIRATION } = require('../constants');
 
 exports.register = async (req, res) => {
   const { email, password } = req.body;
@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
     created_at: user.created_at,
   };
   try {
-    const token = await sign(payload, SECRET, { expiresIn: 10 });
+    const token = await sign(payload, SECRET, { expiresIn: TOKEN_EXPIRATION });
     return res
       .status(200)
       .cookie('token', token, { httpOnly: true })
