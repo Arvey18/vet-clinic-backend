@@ -16,6 +16,7 @@ exports.register = async (req, res) => {
     console.log(error.message);
     return res.status(500).json({
       error: error.message,
+      name: error.name,
     });
   }
 };
@@ -28,7 +29,7 @@ exports.login = async (req, res) => {
     created_at: user.created_at,
   };
   try {
-    const token = await sign(payload, SECRET, { expiresIn: '8h' });
+    const token = await sign(payload, SECRET, { expiresIn: 10 });
     return res
       .status(200)
       .cookie('token', token, { httpOnly: true })
@@ -37,6 +38,7 @@ exports.login = async (req, res) => {
     console.log(error.message);
     return res.status(500).json({
       error: error.message,
+      name: error.name,
     });
   }
 };
@@ -48,9 +50,10 @@ exports.logout = async (_req, res) => {
       .clearCookie('token', { httpOnly: true })
       .json({ success: true, message: 'Logout Successfull!' });
   } catch (error) {
-    console.log(error.message);
+    console.log(JSON.stringify(error));
     return res.status(500).json({
       error: error.message,
+      name: error.name,
     });
   }
 };

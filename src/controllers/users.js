@@ -11,6 +11,7 @@ exports.protectedGetUsers = async (req, res) => {
     console.log(error.message);
     return res.status(500).json({
       error: error.message,
+      name: error.name,
     });
   }
 };
@@ -34,6 +35,7 @@ exports.protectedGetUserByEmail = async (req, res) => {
     console.log(error.message);
     return res.status(500).json({
       error: error.message,
+      name: error.name,
     });
   }
 };
