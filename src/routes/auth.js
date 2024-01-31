@@ -11,7 +11,7 @@ const { registerValidation, loginValidation } = require('../validators/auth');
 const { validationMiddleware } = require('../middlewares/validationMiddleware');
 const { userAuth } = require('../middlewares/authMiddleware');
 
-router.get('/get-users', getUsers);
+// user routes
 router.get('/protected-get-users', userAuth, protectedGetUsers);
 router.post('/register-users', registerValidation, validationMiddleware, register);
 router.post('/login', loginValidation, validationMiddleware, login);

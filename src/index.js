@@ -14,11 +14,11 @@ app.use(cookieParser());
 app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(passport.initialize());
 
-// import auth routes
+// import routes
 const authRoutes = require('./routes/auth');
 
-// intialize auth routes
-app.use('/api', authRoutes);
+// intialize routes
+app.use('/api/users', authRoutes);
 
 // app start
 const appStart = () => {

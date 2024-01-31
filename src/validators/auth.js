@@ -20,6 +20,11 @@ const emailExist = check('email').custom(async (value) => {
 });
 
 const loginFieldsCheck = check('email').custom(async (value, { req }) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new Error('All fields must be filled!');
+  }
+
   // check if email exists
   const user = await db.query('SELECT * from users WHERE email = $1', [value]);
   if (!user.rows.length) {
@@ -27,7 +32,7 @@ const loginFieldsCheck = check('email').custom(async (value, { req }) => {
   }
 
   // check if correct password
-  const validPassword = await compare(req.body.password, user.rows[0].password);
+  const validPassword = await compare(password, user.rows[0].password);
   if (!validPassword) {
     throw new Error('Incorrect password!');
   }
