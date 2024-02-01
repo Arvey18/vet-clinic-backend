@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
     return res
       .status(200)
       .cookie('token', token, { httpOnly: true })
-      .json({ success: true, message: 'Login Successfull!' });
+      .json({ success: true, message: 'Login Successfull!', user: { email: user.email, token } });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({
