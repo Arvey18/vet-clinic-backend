@@ -1,30 +1,41 @@
-const { verify } = require('jsonwebtoken');
-const { SECRET } = require('../constants');
-const db = require('../db');
+import jsonwebtoken from 'jsonwebtoken';
+import { SECRET } from '../constants/index.js';
 
-exports.userAuth = async (req, res, next) => {
-  // get headers
-  const { authorization } = req.headers;
-
-  if (!authorization) {
-    return res.status(401).json({ error: 'Authorization token required!' });
+class AuthMiddleware {
+  constructor(Users) {
+    this.Users = Users;
   }
-  const token = authorization.split(' ')[1];
-  try {
-    const user = verify(token, SECRET);
-    const { rows } = await db.query('SELECT user_id, email from users WHERE user_id = $1', [user.id]);
-    if (!rows.length) {
-      throw new Error('401 not authorized');
+
+  userAuth = async (req, res, next) => {
+    // get headers
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+      return res.status(401).json({ error: 'Authorization token required!' });
     }
 
-    const newUserData = { id: rows[0].id, email: rows[0].email };
-    req.user = newUserData;
-    next();
-  } catch (error) {
-    console.log(error.message);
-    res.status(401).json({
-      error: error.message,
-      name: error.name,
-    });
-  }
-};
+    const token = authorization.split(' ')[1];
+
+    try {
+      const user = jsonwebtoken.verify(token, SECRET);
+
+      const foundUser = await this.Users.findOne({ where: { user_id: user.id } });
+
+      if (!foundUser) {
+        throw new Error('401 not authorized');
+      }
+
+      const newUserData = { id: foundUser.user_id, email: foundUser.email };
+      req.user = newUserData;
+      next();
+    } catch (error) {
+      console.log(error.message);
+      res.status(401).json({
+        error: error.message,
+        name: error.name,
+      });
+    }
+  };
+}
+
+export default AuthMiddleware;

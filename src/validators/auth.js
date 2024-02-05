@@ -1,47 +1,78 @@
-const { check } = require('express-validator');
-const { compare } = require('bcryptjs');
-const db = require('../db');
+import { check } from 'express-validator';
+import bcryptjs from 'bcryptjs';
 
-// check if password length is enough
-const passwordLength = check('password')
-  .isLength({ min: 6, max: 15 })
-  .withMessage('Password has to be between 6 and 15 characters.');
-
-// check if email is not empty and valid
-const emailValid = check('email').isEmail().withMessage('Please provide a valid email.');
-
-// check if email already exists
-const emailExist = check('email').custom(async (value) => {
-  const { rows } = await db.query('SELECT * from users WHERE email = $1', [value]);
-
-  if (rows.length) {
-    throw new Error('Email Already Exist!');
-  }
-});
-
-const loginFieldsCheck = check('email').custom(async (value, { req }) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    throw new Error('All fields must be filled!');
+class AuthValidator {
+  constructor(Users) {
+    this.Users = Users;
+    this.passwordLength = this.checkPasswordLength();
+    this.emailValid = this.checkEmailValidity();
+    this.emailExist = this.checkEmailExistence();
+    this.loginFieldsCheck = this.checkLoginFields();
   }
 
-  // check if email exists
-  const user = await db.query('SELECT * from users WHERE email = $1', [value]);
-  if (!user.rows.length) {
-    throw new Error('Email does not exist!');
+  // check for password length
+  // and if strong
+  checkPasswordLength = () => {
+    return check('password')
+      .isLength({ min: 6 })
+      .withMessage('Password has to be more than 6 characters.')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+      .withMessage(
+        'Password should include at least one lowercase letter, one uppercase letter, one number, and one special character.',
+      );
+  };
+
+  // check if valid email
+  checkEmailValidity = () => {
+    return check('email').isEmail().withMessage('Please provide a valid email.');
+  };
+
+  // check if already registered user using email
+  checkEmailExistence = () => {
+    return check('email').custom(async (value) => {
+      const user = await this.Users.findOne({ where: { email: value } });
+      if (user) {
+        throw new Error('Email Already Exists!');
+      }
+    });
+  };
+
+  // checking login fields
+  checkLoginFields = () => {
+    return check('email').custom(async (value, { req }) => {
+      const { email, password } = req.body;
+
+      // checkinf if fields are empty
+      if (!email || !password) {
+        throw new Error('All fields must be filled!');
+      }
+
+      // check if email exists
+      const user = await this.Users.findOne({ where: { email: value } });
+      if (!user) {
+        throw new Error('Email does not exist!');
+      }
+
+      // check if correct password
+      const validPassword = await bcryptjs.compare(password, user.password);
+      if (!validPassword) {
+        throw new Error('Incorrect password!');
+      }
+
+      // pass data to the next function
+      req.user = user;
+    });
+  };
+
+  // funtion to run register validation
+  get registerValidation() {
+    return [this.emailValid, this.passwordLength, this.emailExist];
   }
 
-  // check if correct password
-  const validPassword = await compare(password, user.rows[0].password);
-  if (!validPassword) {
-    throw new Error('Incorrect password!');
+  // function to run login validation
+  get loginValidation() {
+    return [this.loginFieldsCheck];
   }
+}
 
-  // pass data on next function
-  req.user = user.rows[0];
-});
-
-module.exports = {
-  registerValidation: [emailValid, passwordLength, emailExist],
-  loginValidation: [loginFieldsCheck],
-};
+export default AuthValidator;
