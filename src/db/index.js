@@ -1,23 +1,22 @@
-const { Pool } = require('pg');
+import { Sequelize } from 'sequelize';
 
-const {
+import {
   ENVIRONMENT,
   POSTGRESQL_USER,
   POSTGRESQL_HOST,
   POSTGRESQL_DATABASE,
   POSTGRESQL_PASSWORD,
   POSTGRESQL_PORT,
-} = require('../constants');
+} from '../constants/index.js';
 
-const pool = new Pool({
-  user: POSTGRESQL_USER,
+const sequelize = new Sequelize({
+  dialect: 'postgres',
   host: POSTGRESQL_HOST,
-  database: POSTGRESQL_DATABASE,
-  password: POSTGRESQL_PASSWORD,
   port: POSTGRESQL_PORT,
-  ssl: ENVIRONMENT === 'PRODUCTION' ? true : false,
+  username: POSTGRESQL_USER,
+  password: POSTGRESQL_PASSWORD,
+  database: POSTGRESQL_DATABASE,
+  ssl: ENVIRONMENT === 'PRODUCTION',
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-};
+export default sequelize;

@@ -1,1 +1,3 @@
-const src = require('./src');
+import appStart from './src/index.js';
+
+appStart();

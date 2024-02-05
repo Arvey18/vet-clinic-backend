@@ -1,18 +1,30 @@
-const { Router } = require('express');
-const router = Router();
+import { Router } from 'express';
+
+// validation middlewares
+import validationMiddleware from '../middlewares/validationMiddleware.js';
+import AuthMiddleware from '../middlewares/authMiddleware.js';
+
+// models
+import Users from '../models/users.js';
+import UsersProfile from '../models/usersProfile.js';
 
 // controllers
-const { protectedGetUsers, protectedGetUserByEmail } = require('../controllers/users');
+import UsersController from '../controllers/users.js';
 
-// middlewares
-const { userAuth } = require('../middlewares/authMiddleware');
-const { validationMiddleware } = require('../middlewares/validationMiddleware');
+//initialize users controllers
+const usersController = new UsersController(Users, UsersProfile);
 
-// auth middleware
-router.use(userAuth);
+// initialize auth middleware
+const authMiddleware = new AuthMiddleware(Users);
 
-// users routes
-router.get('/', protectedGetUsers);
-router.get('/profile/:email', validationMiddleware, protectedGetUserByEmail);
+// intialize router
+const router = Router();
 
-module.exports = router;
+// middleware for authentication
+router.use(authMiddleware.userAuth);
+
+// Routes for users
+router.get('/', usersController.protectedGetUsers);
+router.get('/profile/:email', validationMiddleware, usersController.protectedGetUserByEmail);
+
+export default router;

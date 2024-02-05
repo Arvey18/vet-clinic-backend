@@ -1,19 +1,20 @@
-const { config } = require('dotenv');
+import { config } from 'dotenv';
 
 config();
 
-module.exports = {
-  ENVIRONMENT: process.env.ENVIRONMENT,
-  PORT: process.env.PORT,
-  SERVER_URL: process.env.SERVER_URL,
-  CLIENT_URL: process.env.CLIENT_URL,
-  SECRET: process.env.SECRET,
+export const {
+  ENVIRONMENT,
+  PORT,
 
-  POSTGRESQL_USER: process.env.POSTGRESQL_USER,
-  POSTGRESQL_HOST: process.env.POSTGRESQL_HOST,
-  POSTGRESQL_DATABASE: process.env.POSTGRESQL_DATABASE,
-  POSTGRESQL_PASSWORD: process.env.POSTGRESQL_PASSWORD,
-  POSTGRESQL_PORT: process.env.POSTGRESQL_PORT,
+  SERVER_URL,
+  CLIENT_URL,
+  SECRET,
 
-  TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION,
-};
+  POSTGRESQL_USER,
+  POSTGRESQL_HOST,
+  POSTGRESQL_DATABASE,
+  POSTGRESQL_PASSWORD,
+  POSTGRESQL_PORT,
+
+  TOKEN_EXPIRATION,
+} = process.env;

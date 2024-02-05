@@ -1,18 +1,28 @@
-const { Router } = require('express');
-const router = Router();
+import { Router } from 'express';
+
+// models
+import Users from '../models/users.js';
 
 // controllers
-const { register, login, logout } = require('../controllers/auth');
+import AuthController from '../controllers/auth.js';
+
+// validation middlewares
+import validationMiddleware from '../middlewares/validationMiddleware.js';
 
 // validators
-const { registerValidation, loginValidation } = require('../validators/auth');
+import AuthValidator from '../validators/auth.js';
 
-// middlewares
-const { validationMiddleware } = require('../middlewares/validationMiddleware');
+// initialize auth validator
+const authValidator = new AuthValidator(Users);
+// initialize auth controllers
+const authController = new AuthController(Users);
 
-// auth routs
-router.post('/register-users', registerValidation, validationMiddleware, register);
-router.post('/login', loginValidation, validationMiddleware, login);
-router.post('/logout', logout);
+// intialize router
+const router = Router();
 
-module.exports = router;
+// Auth routes
+router.post('/register-users', authValidator.registerValidation, validationMiddleware, authController.register);
+router.post('/login', authValidator.loginValidation, validationMiddleware, authController.login);
+router.post('/logout', authController.logout);
+
+export default router;
