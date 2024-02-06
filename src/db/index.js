@@ -16,7 +16,9 @@ const sequelize = new Sequelize({
   username: POSTGRESQL_USER,
   password: POSTGRESQL_PASSWORD,
   database: POSTGRESQL_DATABASE,
-  ssl: ENVIRONMENT === 'PRODUCTION',
+  dialectOptions: {
+    ssl: ENVIRONMENT === 'PRODUCTION', // Enable SSL based on environment
+  },
 });
 
 export default sequelize;
